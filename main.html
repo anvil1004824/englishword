@@ -120,7 +120,7 @@
       function startGame() {
         if (wordList.length < 4) {
           alert(
-            "게임을 시작할 수 있는 단어 개수가 부족합니다. 단어를 더 추가해주세요."
+            "게임을 시작할 수 있는 단어 개수는 4개입니다. 단어를 더 추가해주세요."
           );
           return;
         }
@@ -214,7 +214,7 @@
           score++;
           alert("정답입니다!");
         } else {
-          alert("오답입니다. 정답은 " + selectedWord.word + "입니다.");
+          alert("오답입니다. 정답은 " + selectedWord.definition + "입니다.");
         }
 
         currentIndex++;
