@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>영어 단어 게임</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+      }
+
+      h1 {
+        text-align: center;
+      }
+
+      .button {
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+      }
+
+      .button-primary {
+        background-color: #007bff;
+        color: #fff;
+      }
+
+      .button-primary:hover {
+        background-color: #0056b3;
+      }
+
+      .button-danger {
+        background-color: #dc3545;
+        color: #fff;
+      }
+
+      .button-danger:hover {
+        background-color: #b02a37;
+      }
+
+      .game-container {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      .word {
+        font-size: 30px;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      .word-choice-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .word-choice {
+        margin: 10px;
+        padding: 10px 20px;
+        font-size: 18px;
+        background-color: #fff;
+        border: 1px solid gray;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .word-choice:hover {
+        background-color: #f2f2f2;
+      }
+
+      .selected {
+        background-color: #007bff;
+        color: #fff;
+      }
+
+      .score-container {
+        margin-top: 20px;
+        font-weight: bold;
+        text-align: center;
+      }
+
+      .word-list-container {
+        margin-top: 20px;
+        padding: 10px;
+        background-color: #fff;
+      }
+
+      .word-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+
+      .word-info {
+        font-size: 16px;
+      }
+
+      .delete-button {
+        padding: 5px 10px;
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+    <script>
+      var wordList = []; // 단어 목록 배열
+      var score = 0; // 점수 초기화
+      var currentIndex = 0; // 현재 문제 인덱스
+
+      // 게임 시작 함수
+      function startGame() {
+        if (wordList.length < 4) {
+          alert(
+            "게임을 시작할 수 있는 단어 개수가 부족합니다. 단어를 더 추가해주세요."
+          );
+          return;
+        }
+
+        if (currentIndex === wordList.length) {
+          var gameContainer = document.getElementById("gameContainer");
+          gameContainer.innerHTML = "";
+          var scoreContainer = document.getElementById("scoreContainer");
+          scoreContainer.textContent =
+            "게임이 끝났습니다. 당신의 점수는 " + score + "점 입니다.";
+          score = 0; // 점수 초기화
+          currentIndex = 0; // 인덱스 초기화
+          return;
+        }
+
+        // 단어 순서 무작위로 섞기
+        if (currentIndex === 0) {
+          shuffleArray(wordList);
+        }
+
+        var selectedWord = wordList[currentIndex];
+
+        var gameContainer = document.getElementById("gameContainer");
+        gameContainer.innerHTML = "";
+
+        var wordElement = document.createElement("div");
+        wordElement.textContent = selectedWord.word;
+        wordElement.className = "word";
+        gameContainer.appendChild(wordElement);
+
+        var choices = getChoices(selectedWord);
+
+        var wordChoiceContainer = document.createElement("div");
+        wordChoiceContainer.className = "word-choice-container";
+        gameContainer.appendChild(wordChoiceContainer);
+
+        for (var i = 0; i < choices.length; i++) {
+          var wordChoiceElement = document.createElement("div");
+          wordChoiceElement.textContent = choices[i].definition;
+          wordChoiceElement.className = "word-choice";
+          wordChoiceElement.dataset.word = choices[i].word;
+          wordChoiceElement.addEventListener("click", function () {
+            selectWord(this, selectedWord);
+          });
+          wordChoiceContainer.appendChild(wordChoiceElement);
+        }
+      }
+
+      // 선택지 생성 함수
+      function getChoices(selectedWord) {
+        var choices = [];
+        choices.push(selectedWord);
+
+        var availableWords = wordList.filter(function (word) {
+          return word.word !== selectedWord.word;
+        });
+
+        while (choices.length < 4) {
+          var randomIndex = Math.floor(Math.random() * availableWords.length);
+          var word = availableWords[randomIndex];
+
+          choices.push(word);
+          availableWords.splice(randomIndex, 1);
+        }
+
+        shuffleArray(choices);
+        return choices;
+      }
+
+      // 선택지 섞기 함수
+      function shuffleArray(array) {
+        for (var i = array.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var temp = array[i];
+          array[i] = array[j];
+          array[j] = temp;
+        }
+      }
+
+      // 단어 선택 함수
+      function selectWord(element, selectedWord) {
+        var wordChoices = document.getElementsByClassName("word-choice");
+        for (var i = 0; i < wordChoices.length; i++) {
+          wordChoices[i].classList.remove("selected");
+        }
+        element.classList.add("selected");
+
+        var userChoice = element.dataset.word;
+
+        if (userChoice === selectedWord.word) {
+          score++;
+          alert("정답입니다!");
+        } else {
+          alert("오답입니다. 정답은 " + selectedWord.word + "입니다.");
+        }
+
+        currentIndex++;
+        startGame();
+      }
+
+      // 단어 추가 함수
+      function addWord() {
+        var word = prompt("영어 단어를 입력하세요:");
+        var definition = prompt("단어의 뜻을 입력하세요:");
+
+        if (word && definition) {
+          var newWord = { word: word, definition: definition };
+          wordList.push(newWord);
+          renderWordList();
+        } else {
+          alert("올바른 단어와 뜻을 입력하세요.");
+        }
+      }
+
+      // 단어 목록 표시 함수
+      function renderWordList() {
+        var wordListContainer = document.getElementById("wordListContainer");
+        wordListContainer.innerHTML = "";
+
+        for (var i = 0; i < wordList.length; i++) {
+          var wordItem = document.createElement("div");
+          wordItem.className = "word-item";
+
+          var wordInfo = document.createElement("span");
+          wordInfo.textContent =
+            wordList[i].word + " - " + wordList[i].definition;
+          wordInfo.className = "word-info";
+          wordItem.appendChild(wordInfo);
+
+          var deleteButton = document.createElement("button");
+          deleteButton.textContent = "삭제";
+          deleteButton.className = "delete-button";
+          deleteButton.dataset.index = i;
+          deleteButton.addEventListener("click", function () {
+            deleteWord(this.dataset.index);
+          });
+          wordItem.appendChild(deleteButton);
+
+          wordListContainer.appendChild(wordItem);
+        }
+      }
+
+      // 단어 삭제 함수
+      function deleteWord(index) {
+        wordList.splice(index, 1);
+        renderWordList();
+      }
+
+      // 초기화 함수
+      function resetGame() {
+        score = 0;
+        currentIndex = 0;
+
+        var gameContainer = document.getElementById("gameContainer");
+        gameContainer.innerHTML = "";
+
+        var scoreContainer = document.getElementById("scoreContainer");
+        scoreContainer.textContent = "";
+      }
+
+      // 단어 목록 토글 함수
+      function toggleWordList() {
+        var wordListContainer = document.getElementById("wordListContainer");
+        wordListContainer.classList.toggle("hidden");
+      }
+    </script>
+  </head>
+  <body>
+    <h1>영어 단어 게임</h1>
+    <button class="button button-primary" onclick="startGame()">
+      게임 시작
+    </button>
+    <button class="button button-danger" onclick="resetGame()">초기화</button>
+    <button class="button" onclick="addWord()">단어 추가</button>
+    <button class="button" onclick="toggleWordList()">단어 목록 토글</button>
+    <div class="game-container" id="gameContainer"></div>
+    <div class="score-container" id="scoreContainer"></div>
+    <div class="word-list-container hidden" id="wordListContainer"></div>
+  </body>
+</html>
